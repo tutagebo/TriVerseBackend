@@ -1,0 +1,8 @@
+services:
+  db:
+    build: .
+    container_name: "triverse_db"
+    env_file:
+      - .db.env
+    ports:
+      - "53306:3306"
