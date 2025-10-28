@@ -1,0 +1,17 @@
+services:
+  api:
+    build: ./api
+    depends_on:
+      - db
+    env_file:
+      - ./api/.api.env
+    ports:
+      - "53000:3000"
+
+  db:
+    build: ./db
+    container_name: "triverse_db"
+    env_file:
+      - ./db/.db.env
+    ports:
+      - "53306:3306"

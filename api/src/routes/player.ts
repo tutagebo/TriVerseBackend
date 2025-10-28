@@ -3,8 +3,9 @@ import * as apiPath from '../controllers/playerController';
 
 const router: Router = express.Router();
 
-// /users/
-router.get('/', apiPath.list);
-// router.post('/', errorHandler(apiPath.create));
+// /player/
+router.get('/', apiPath.getAll);
+router.get('/:id', apiPath.getById);
+router.post('/register', apiPath.register);
 
 export default router;

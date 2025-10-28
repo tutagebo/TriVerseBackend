@@ -2,17 +2,19 @@
 -- 必要なら: CREATE DATABASE IF NOT EXISTS app CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
 -- PLAYER
-CREATE TABLE IF NOT EXISTS `PLAYER` (
+CREATE TABLE IF NOT EXISTS `players` (
   `id`            BINARY(16)      NOT NULL,
+  `login_id`      VARCHAR(64)     NOT NULL,
   `name`          VARCHAR(32)     NOT NULL,
   `password_hash` VARBINARY(255)  NOT NULL,
   `created_at`    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_player_login_id` (`login_id`),
   UNIQUE KEY `uq_player_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- MUSIC
-CREATE TABLE IF NOT EXISTS `MUSIC` (
+CREATE TABLE IF NOT EXISTS `musics` (
   `id`            BINARY(16)   NOT NULL,
   `post_player_id`  BINARY(16)   NOT NULL,
   `title`         VARCHAR(64)  NOT NULL,
@@ -21,12 +23,12 @@ CREATE TABLE IF NOT EXISTS `MUSIC` (
   PRIMARY KEY (`id`),
   KEY `ix_music_post_player` (`post_player_id`),
   CONSTRAINT `fk_music_post_player`
-    FOREIGN KEY (`post_player_id`) REFERENCES `PLAYER`(`id`)
+    FOREIGN KEY (`post_player_id`) REFERENCES `players`(`id`)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- CHART（難易度は 1〜32 の整数）
-CREATE TABLE IF NOT EXISTS `CHART` (
+CREATE TABLE IF NOT EXISTS `charts` (
   `id`               BINARY(16)        NOT NULL,
   `music_id`         BINARY(16)        NOT NULL,
   `creator_player_id`  BINARY(16)        NOT NULL,
@@ -37,15 +39,15 @@ CREATE TABLE IF NOT EXISTS `CHART` (
   KEY `ix_chart_creator` (`creator_player_id`),
   CONSTRAINT `chk_chart_difficulty` CHECK (`difficulty` BETWEEN 1 AND 32),
   CONSTRAINT `fk_chart_music`
-    FOREIGN KEY (`music_id`) REFERENCES `MUSIC`(`id`)
+    FOREIGN KEY (`music_id`) REFERENCES `musics`(`id`)
     ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT `fk_chart_creator`
-    FOREIGN KEY (`creator_player_id`) REFERENCES `PLAYER`(`id`)
+    FOREIGN KEY (`creator_player_id`) REFERENCES `players`(`id`)
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- HIGH_SCORE（プレイヤー×譜面で疑似1対1：複合主キー）
-CREATE TABLE IF NOT EXISTS `HIGH_SCORE` (
+-- high_scores（プレイヤー×譜面で疑似1対1：複合主キー）
+CREATE TABLE IF NOT EXISTS `high_scores` (
   `player_id`  BINARY(16)  NOT NULL,
   `chart_id`   BINARY(16)  NOT NULL,
   `score`      INT         NOT NULL,
@@ -54,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `HIGH_SCORE` (
   PRIMARY KEY (`player_id`, `chart_id`),
   KEY `ix_hs_chart` (`chart_id`),
   CONSTRAINT `fk_hs_player`
-    FOREIGN KEY (`player_id`)  REFERENCES `PLAYER`(`id`)
+    FOREIGN KEY (`player_id`)  REFERENCES `players`(`id`)
     ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `fk_hs_chart`
-    FOREIGN KEY (`chart_id`) REFERENCES `CHART`(`id`)
+    FOREIGN KEY (`chart_id`) REFERENCES `charts`(`id`)
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

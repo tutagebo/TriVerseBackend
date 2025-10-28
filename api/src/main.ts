@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import usersRouter from './routes/player';
+import playerRouter from './routes/player';
 
 const app: Application = express();
 const port = 3000;
@@ -8,7 +8,7 @@ const port = 3000;
 app.use(express.json());
 
 // ルート登録
-app.use('/users', usersRouter);
+app.use('/player', playerRouter);
 
 app.listen(port, () => {
   console.log(`listening on ${port}`);

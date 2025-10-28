@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON triverse.* TO 'tutan'@'%';
+FLUSH PRIVILEGES;
