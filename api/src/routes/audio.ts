@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import * as apiPath from '../controllers/playerController';
+import * as apiPath from '../controllers/audioController';
 
 const router: Router = express.Router();
 
@@ -7,8 +7,6 @@ const router: Router = express.Router();
 // 公開時には削除
 router.get('/', apiPath.getAll);
 
-router.get('/:id', apiPath.getById);
-router.post('/login', apiPath.login);
 router.post('/register', apiPath.register);
 
 export default router;
