@@ -7,6 +7,6 @@ const router: Router = express.Router();
 // 公開時には削除
 router.get('/', apiPath.getAll);
 
-router.post('/register', apiPath.register);
+router.post('/register', apiPath.postMusic);
 
 export default router;
