@@ -6,7 +6,7 @@ export interface DataResponse {
 
 export interface RegisterResponse extends DataResponse {
   data?: {
-    login_id: string;
+    loginId: string;
     name: string;
   };
 }

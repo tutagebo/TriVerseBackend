@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { pool } from '../config/mysqlPool';
 import { PlayerRegister, PlayerReturn } from '../types/playerSQL';
 import { uuidParse, uuidStringify } from "../utils/uuid";
-import { v7 as uuidv7, v7 } from 'uuid';
+import { v7 } from 'uuid';
 import { RegisterRequest } from '../types/request';
 import { LoginResponse, RegisterResponse } from '../types/response';
 
@@ -27,11 +27,11 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
             res.status(404).json({ message: 'Player not found' });
             return;
         }
-        const player_res = {
+        const playerResponse = {
             ...rows[0],
             id: uuidStringify(rows[0].id)
         };
-        res.status(200).json(player_res);
+        res.status(200).json(playerResponse);
 
     } catch (error) {
         res.status(500).json({ message: `${error}` });
@@ -39,31 +39,35 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-    const requestBody: RegisterRequest = req.body;
+    const requestBody: RegisterRequest = {
+        loginId: req.body.login_id,
+        name: req.body.name,
+        password: req.body.password
+    }
     const registerPlayer: PlayerRegister = {
         id: Buffer.from(uuidParse(v7())),
-        login_id: requestBody.login_id,
+        loginId: requestBody.loginId,
         name: requestBody.name,
-        password_hash: Buffer.from(requestBody.password, 'utf-8')
+        passwordHash: Buffer.from(requestBody.password, 'utf-8')
     };
 
     const checkSql = 'SELECT id FROM players WHERE login_id = ? LIMIT 1';
-    const [rows] = await pool.execute<PlayerReturn[]>(checkSql, [requestBody.login_id]);
+    const [rows] = await pool.execute<PlayerReturn[]>(checkSql, [requestBody.loginId]);
     if (rows.length > 0) {
       res.status(409).json({
         success: false,
-        message: 'This login_id is already in use'
+        message: 'This login id is already in use'
       } satisfies RegisterResponse);
       return;
     }
 
     const sql = 'INSERT INTO players (id, login_id, name, password_hash) VALUES (?, ?, ?, ?)'
-    await pool.execute(sql, [registerPlayer.id, registerPlayer.login_id, registerPlayer.name, registerPlayer.password_hash]);
+    await pool.execute(sql, [registerPlayer.id, registerPlayer.loginId, registerPlayer.name, registerPlayer.passwordHash]);
     const response: RegisterResponse = {
       success: true,
       message: 'Player registered successfully',
       data: {
-        login_id: requestBody.login_id,
+        loginId: requestBody.loginId,
         name: requestBody.name
       }
     };
@@ -71,10 +75,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
+    const conn = await pool.getConnection();
     try {
-        const { login_id, password } = req.body;
+        const { login_id: loginId , password } = req.body;
         const sql = 'SELECT * FROM players WHERE login_id = ? AND password_hash = ?';
-        const [rows] = await pool.execute<PlayerReturn[]>(sql, [login_id, Buffer.from(password, 'utf-8')]);
+        const [rows] = await conn.execute<PlayerReturn[]>(sql, [loginId, Buffer.from(password, 'utf-8')]);
         const new_player: PlayerReturn = rows[0] ?? null;
 
         if(!new_player) {
@@ -94,18 +99,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             }
         };
         res.status(200).json(player_res);
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Invalid login server error'
-        } satisfies LoginResponse);
-    }
-}
-
-export const postMusic = async (req: Request, res: Response): Promise<void> => {
-    try {
-        
 
     } catch (error) {
         res.status(500).json({
