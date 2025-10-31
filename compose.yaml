@@ -1,7 +1,7 @@
 services:
   api:
     build: ./api
-    container_name: "triverse_api"
+    container_name: "tv_api"
     depends_on:
       - db
     env_file:
@@ -15,8 +15,12 @@ services:
 
   db:
     build: ./db
-    container_name: "triverse_db"
+    container_name: "tv_db"
     env_file:
       - ./db/.db.env
-    ports:
-      - "53306:3306"
+
+  session_redis:
+    build: ./redis/session
+    container_name: "tv_session_redis"
+    env_file:
+      - ./redis/session/.session.env

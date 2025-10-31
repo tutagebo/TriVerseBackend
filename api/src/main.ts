@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import playerRouter from './routes/player';
 import musicRouter from './routes/music';
+import { closeRedis, initRedis } from './config/redis';
 
 const app: Application = express();
 const port = 3000;
@@ -12,6 +13,17 @@ app.use(express.json());
 app.use('/player', playerRouter);
 app.use('/music', musicRouter);
 
-app.listen(port, async () => {
+const server = app.listen(port, async () => {
+    await initRedis();
     console.log(`listening on ${port}`);
 });
+
+function shutdown() {
+    server.close(async () => {
+        await closeRedis();
+        process.exit(0);
+    });
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

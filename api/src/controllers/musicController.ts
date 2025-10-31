@@ -35,6 +35,7 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
 
 // 無限にアップロードできるとまずいので、適切に制限をかける
 // ユーザー認証も必要
+// 許可用のテーブルも実装したい
 export const postMusic = async (req: Request, res: Response): Promise<void> => {
     if (!req.files?.music?.[0] || !req.files?.jacket?.[0]) {
         res.status(400).json({
