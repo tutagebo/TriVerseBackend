@@ -14,6 +14,6 @@ export interface RegisterResponse extends DataResponse {
 export interface LoginResponse extends DataResponse {
   data?: {
     name: string;
-    uuid: string;
+    sid: string;
   };
 }

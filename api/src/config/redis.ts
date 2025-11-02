@@ -17,5 +17,9 @@ export async function initRedis() {
 
 // 終了時にクリーンアップ
 export async function closeRedis() {
-    await redis.quit();
+    try {
+        await redis.quit();
+    } catch {
+        redis.disconnect();
+    }
 }

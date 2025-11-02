@@ -3,8 +3,11 @@ import { pool } from '../config/mysqlPool';
 import { PlayerRegister, PlayerReturn } from '../types/playerSQL';
 import { uuidParse, uuidStringify } from "../utils/uuid";
 import { v7 } from 'uuid';
+import * as crypto from "crypto";
 import { RegisterRequest } from '../types/request';
 import { LoginResponse, RegisterResponse } from '../types/response';
+import { redis } from '../config/redis';
+import { generateSession } from '../utils/session';
 
 export const getAll = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -90,12 +93,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        const sid = await generateSession(new_player.loginId);
         const player_res: LoginResponse = {
             success: true,
             message: 'Player registered successfully',
             data: {
                 name: new_player.name,
-                uuid: uuidStringify(new_player.id)
+                sid: sid
             }
         };
         res.status(200).json(player_res);

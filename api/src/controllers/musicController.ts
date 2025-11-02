@@ -8,6 +8,7 @@ import { removeDir, saveFile } from '../utils/file';
 import { MusicData } from '../types/musicData';
 
 import dotenv from 'dotenv';
+import { isExistSession } from '../utils/session';
 dotenv.config();
 
 // 型用
@@ -37,6 +38,13 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
 // ユーザー認証も必要
 // 許可用のテーブルも実装したい
 export const postMusic = async (req: Request, res: Response): Promise<void> => {
+    if (!(await isExistSession(req.body.sid))) {
+        res.status(401).json({
+            success: false,
+            message: '無効なセッションです。',
+        });
+        return;
+    }
     if (!req.files?.music?.[0] || !req.files?.jacket?.[0]) {
         res.status(400).json({
             success: false,
