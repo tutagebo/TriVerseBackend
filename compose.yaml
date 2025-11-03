@@ -10,7 +10,7 @@ services:
       - ./data/music:/app/data/music
       - ./data/chart:/app/data/chart
     ports:
-      - "53000:3000"
+      - "80:3000"
     user: "1000:1000"
 
   db:
