@@ -13,7 +13,7 @@ app.use(express.json());
 app.use('/player', playerRouter);
 app.use('/music', musicRouter);
 
-const server = app.listen(port, async () => {
+const server = app.listen(port, '0.0.0.0', async () => {
     await initRedis();
     console.log(`listening on ${port}`);
 });

@@ -8,6 +8,7 @@ import { removeDir, saveFile } from '../utils/file';
 import { MusicData } from '../types/musicData';
 
 import dotenv from 'dotenv';
+import { isExistSession } from '../utils/session';
 dotenv.config();
 
 // 型用
@@ -17,6 +18,7 @@ declare global {
       files?: {
         music?: Multer.File[];
         jacket?: Multer.File[];
+        license_image?: Multer.File[];
         // 他にもあればここに追加
       };
     }
@@ -37,6 +39,13 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
 // ユーザー認証も必要
 // 許可用のテーブルも実装したい
 export const postMusic = async (req: Request, res: Response): Promise<void> => {
+    if (!(await isExistSession(req.body.sid))) {
+        res.status(401).json({
+            success: false,
+            message: '無効なセッションです。',
+        });
+        return;
+    }
     if (!req.files?.music?.[0] || !req.files?.jacket?.[0]) {
         res.status(400).json({
             success: false,
@@ -51,6 +60,7 @@ export const postMusic = async (req: Request, res: Response): Promise<void> => {
         postPlayerId: req.body.post_player_id as string,
         audioData: req.files?.music?.[0].buffer as Buffer,
         jacketData: req.files?.jacket?.[0].buffer as Buffer,
+        licenseImageData: req.files?.license_image?.[0]?.buffer as Buffer,
     }
     const MUSIC_DIR: string = (process.env.DATA_DIR || '/app/data') + `/music/${musicData.id}/`;
 
@@ -64,9 +74,10 @@ export const postMusic = async (req: Request, res: Response): Promise<void> => {
             musicData.artist, musicData.title,
             Buffer.from(uuidParse(musicData.postPlayerId))
         ]);
-
+        // ファイル保存
         await saveFile(MUSIC_DIR + "audio.mp3", musicData.audioData!);
         await saveFile(MUSIC_DIR + "jacket.jpg", musicData.jacketData!);
+        await saveFile(MUSIC_DIR + "license.jpg", musicData.licenseImageData!);
 
         // ここで反映
         await conn.commit();

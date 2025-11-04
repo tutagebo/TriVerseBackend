@@ -5,5 +5,6 @@ export interface MusicData {
     postPlayerId: string;
     audioData?: Buffer;
     jacketData?: Buffer;
+    licenseImageData?: Buffer;
     createdAt?: Date;
 }
